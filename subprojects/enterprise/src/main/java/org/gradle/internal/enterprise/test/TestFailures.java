@@ -14,66 +14,24 @@
  * limitations under the License.
  */
 
-package org.gradle.api.internal.tasks.testing;
+package org.gradle.internal.enterprise.test;
 
+import org.gradle.api.internal.tasks.testing.DefaultTestFailure;
+import org.gradle.api.internal.tasks.testing.DefaultTestFailureDetails;
 import org.gradle.api.tasks.testing.TestFailure;
-import org.gradle.api.tasks.testing.TestFailureDetails;
 
+import javax.annotation.Nullable;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class DefaultTestFailure implements TestFailure {
+public class TestFailures {
 
-    private final Throwable rawFailure;
-    private final TestFailureDetails details;
-
-    public DefaultTestFailure(Throwable rawFailure, TestFailureDetails details) {
-        this.rawFailure = rawFailure;
-        this.details = details;
-    }
-
-    @Override
-    public Throwable getRawFailure() {
-        return rawFailure;
-    }
-
-    @Override
-    public TestFailureDetails getDetails() {
-        return details;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        DefaultTestFailure that = (DefaultTestFailure) o;
-
-        if (rawFailure != null ? !rawFailure.equals(that.rawFailure) : that.rawFailure != null) {
-            return false;
-        }
-        return details != null ? details.equals(that.details) : that.details == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = rawFailure != null ? rawFailure.hashCode() : 0;
-        result = 31 * result + (details != null ? details.hashCode() : 0);
-        return result;
-    }
-
-    public static TestFailure fromTestAssertionFailure(Throwable failure, String expected, String actual) {
-        // NOTE: this method needs to be in sync with org.gradle.internal.enterprise.test.TestFailures.fromTestAssertionFailure()
+    public static TestFailure fromTestAssertionFailure(Throwable failure, @Nullable String expected, @Nullable String actual) {
         DefaultTestFailureDetails details = new DefaultTestFailureDetails(failure.getMessage(), failure.getClass().getName(), stacktraceOf(failure), true, expected, actual);
         return new DefaultTestFailure(failure, details);
     }
 
     public static TestFailure fromTestFrameworkFailure(Throwable failure) {
-        // NOTE: this method needs to be in sync with org.gradle.internal.enterprise.test.TestFailures.fromTestFrameworkFailure()
         DefaultTestFailureDetails details = new DefaultTestFailureDetails(messageOf(failure), failure.getClass().getName(), stacktraceOf(failure), false, null, null);
         return new DefaultTestFailure(failure, details);
     }
