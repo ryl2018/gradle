@@ -16,14 +16,12 @@
 
 package org.gradle.smoketests
 
-
 import org.gradle.test.fixtures.file.TestFile
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
-import spock.lang.Ignore
 import spock.lang.Issue
+import spock.lang.PendingFeature
 
-@Ignore("This test is expected to fail. Exposing test failure types requires a breaking change in TestResultProcessor which is used by the test retry plugin")
 class TestRetryPluginSmokeTest extends AbstractSmokeTest {
     def setup() {
         sourceFile()
@@ -38,6 +36,7 @@ class TestRetryPluginSmokeTest extends AbstractSmokeTest {
         """
     }
 
+    @PendingFeature(reason ="Exposing test failure types requires a breaking change in TestResultProcessor which is used by the test retry plugin")
     @Issue('https://plugins.gradle.org/plugin/org.gradle.test-retry')
     def 'test retry plugin'() {
         given:
@@ -65,6 +64,7 @@ class TestRetryPluginSmokeTest extends AbstractSmokeTest {
         assertHasFlakyOutput(result)
     }
 
+    @PendingFeature(reason ="Exposing test failure types requires a breaking change in TestResultProcessor which is used by the test retry plugin")
     @Issue('https://plugins.gradle.org/plugin/org.gradle.test-retry')
     def 'test retry plugin with test suites'() {
         given:
