@@ -25,6 +25,7 @@ import org.gradle.api.internal.tasks.testing.TestDescriptorInternal;
 import org.gradle.api.internal.tasks.testing.TestResultProcessor;
 import org.gradle.api.internal.tasks.testing.TestStartEvent;
 import org.gradle.api.internal.tasks.testing.junit.JUnitSupport;
+import org.gradle.api.tasks.testing.TestFailure;
 import org.gradle.api.tasks.testing.TestResult.ResultType;
 import org.gradle.internal.MutableBoolean;
 import org.gradle.internal.id.CompositeIdGenerator;
@@ -106,7 +107,7 @@ public class JUnitPlatformTestExecutionListener implements TestExecutionListener
             } else {
                 TestDescriptorInternal syntheticTestDescriptor = createSyntheticTestDescriptorForContainer(testIdentifier);
                 resultProcessor.started(syntheticTestDescriptor, startEvent(getId(testIdentifier)));
-                resultProcessor.failure(syntheticTestDescriptor.getId(), DefaultTestFailure.fromTestFrameworkFailure(failure));
+                resultProcessor.failure(syntheticTestDescriptor.getId(), TestFailure.fromTestFrameworkFailure(failure));
                 resultProcessor.completed(syntheticTestDescriptor.getId(), completeEvent());
             }
         }
@@ -126,9 +127,9 @@ public class JUnitPlatformTestExecutionListener implements TestExecutionListener
         if (failure instanceof AssertionError) {
             String expected = reflectivelyReadExpected(failure);
             String actual = reflectivelyReadActual(failure);
-            resultProcessor.failure(getId(testIdentifier), DefaultTestFailure.fromTestAssertionFailure(failure, expected, actual));
+            resultProcessor.failure(getId(testIdentifier), TestFailure.fromTestAssertionFailure(failure, expected, actual));
         } else {
-            resultProcessor.failure(getId(testIdentifier), DefaultTestFailure.fromTestFrameworkFailure(failure));
+            resultProcessor.failure(getId(testIdentifier), TestFailure.fromTestFrameworkFailure(failure));
         }
     }
 

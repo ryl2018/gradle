@@ -17,11 +17,11 @@
 package org.gradle.api.internal.tasks.testing.junit;
 
 import org.gradle.api.internal.tasks.testing.DefaultTestDescriptor;
-import org.gradle.api.internal.tasks.testing.DefaultTestFailure;
 import org.gradle.api.internal.tasks.testing.TestCompleteEvent;
 import org.gradle.api.internal.tasks.testing.TestDescriptorInternal;
 import org.gradle.api.internal.tasks.testing.TestResultProcessor;
 import org.gradle.api.internal.tasks.testing.TestStartEvent;
+import org.gradle.api.tasks.testing.TestFailure;
 import org.gradle.api.tasks.testing.TestResult;
 import org.gradle.internal.id.IdGenerator;
 import org.gradle.internal.time.Clock;
@@ -91,11 +91,11 @@ public class JUnitTestEventAdapter extends RunListener {
         // All assertion errors are subclasses of the AssertionError class. If the received failure is not an instance of AssertionError then it is categorized as a framework failure.
         if (failure instanceof ComparisonFailure) {
             ComparisonFailure comparisonFailure = (ComparisonFailure) failure;
-            resultProcessor.failure(descriptorId, DefaultTestFailure.fromTestAssertionFailure(failure, comparisonFailure.getExpected(), comparisonFailure.getActual()));
+            resultProcessor.failure(descriptorId, TestFailure.fromTestAssertionFailure(failure, comparisonFailure.getExpected(), comparisonFailure.getActual()));
         } else if (failure instanceof AssertionError) {
-            resultProcessor.failure(descriptorId, DefaultTestFailure.fromTestAssertionFailure(failure, null, null));
+            resultProcessor.failure(descriptorId, TestFailure.fromTestAssertionFailure(failure, null, null));
         } else {
-            resultProcessor.failure(descriptorId, DefaultTestFailure.fromTestFrameworkFailure(failure));
+            resultProcessor.failure(descriptorId, TestFailure.fromTestFrameworkFailure(failure));
         }
     }
 

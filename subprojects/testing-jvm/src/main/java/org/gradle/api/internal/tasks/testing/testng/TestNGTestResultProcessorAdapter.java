@@ -17,7 +17,6 @@
 package org.gradle.api.internal.tasks.testing.testng;
 
 import org.gradle.api.internal.tasks.testing.DefaultTestClassDescriptor;
-import org.gradle.api.internal.tasks.testing.DefaultTestFailure;
 import org.gradle.api.internal.tasks.testing.DefaultTestMethodDescriptor;
 import org.gradle.api.internal.tasks.testing.DefaultTestSuiteDescriptor;
 import org.gradle.api.internal.tasks.testing.TestCompleteEvent;
@@ -273,9 +272,9 @@ public class TestNGTestResultProcessorAdapter implements ISuiteListener, ITestLi
     private void reportTestFailure(Object testId, Throwable rawFailure) {
         // TestNG only uses java.lang.AssertionError to represent assertion failures
         if (rawFailure instanceof AssertionError) {
-            resultProcessor.failure(testId, DefaultTestFailure.fromTestAssertionFailure(rawFailure, null, null));
+            resultProcessor.failure(testId, TestFailure.fromTestAssertionFailure(rawFailure, null, null));
         } else {
-            resultProcessor.failure(testId, DefaultTestFailure.fromTestFrameworkFailure(rawFailure));
+            resultProcessor.failure(testId, TestFailure.fromTestFrameworkFailure(rawFailure));
         }
     }
 
@@ -303,7 +302,7 @@ public class TestNGTestResultProcessorAdapter implements ISuiteListener, ITestLi
         TestDescriptorInternal test = new DefaultTestMethodDescriptor(idGenerator.generateId(), testClass.getName(), testMethod.getMethodName());
         Object parentId = classInfo == null ? null : classInfo.id;
         resultProcessor.started(test, new TestStartEvent(testResult.getStartMillis(), parentId));
-        TestFailure testFailure = DefaultTestFailure.fromTestFrameworkFailure(testResult.getThrowable());
+        TestFailure testFailure = TestFailure.fromTestFrameworkFailure(testResult.getThrowable());
         resultProcessor.failure(test.getId(), testFailure);
         resultProcessor.completed(test.getId(), new TestCompleteEvent(testResult.getEndMillis(), TestResult.ResultType.FAILURE));
     }

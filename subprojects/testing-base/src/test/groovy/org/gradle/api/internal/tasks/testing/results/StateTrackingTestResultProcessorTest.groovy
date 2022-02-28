@@ -15,8 +15,14 @@
  */
 package org.gradle.api.internal.tasks.testing.results
 
-import org.gradle.api.internal.tasks.testing.*
+import org.gradle.api.internal.tasks.testing.DecoratingTestDescriptor
+import org.gradle.api.internal.tasks.testing.DefaultTestDescriptor
+import org.gradle.api.internal.tasks.testing.DefaultTestOutputEvent
+import org.gradle.api.internal.tasks.testing.DefaultTestSuiteDescriptor
+import org.gradle.api.internal.tasks.testing.TestCompleteEvent
+import org.gradle.api.internal.tasks.testing.TestStartEvent
 import org.gradle.api.tasks.testing.TestDescriptor
+import org.gradle.api.tasks.testing.TestFailure
 import org.gradle.api.tasks.testing.TestOutputEvent
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.TestResult.ResultType
@@ -63,7 +69,7 @@ class StateTrackingTestResultProcessorTest extends Specification {
 
     void createsAResultForATestWithFailure() {
         given:
-        def failure = DefaultTestFailure.fromTestFrameworkFailure(new RuntimeException())
+        def failure = TestFailure.fromTestFrameworkFailure(new RuntimeException())
         def test = new DefaultTestDescriptor("15", "Foo", "bar");
         def startEvent = new TestStartEvent(100L)
         def completeEvent = new TestCompleteEvent(200L)
@@ -84,8 +90,8 @@ class StateTrackingTestResultProcessorTest extends Specification {
 
     void createsAResultForATestWithMultipleFailures() {
         given:
-        def failure1 = DefaultTestFailure.fromTestFrameworkFailure(new RuntimeException())
-        def failure2 = DefaultTestFailure.fromTestFrameworkFailure(new RuntimeException())
+        def failure1 = TestFailure.fromTestFrameworkFailure(new RuntimeException())
+        def failure2 = TestFailure.fromTestFrameworkFailure(new RuntimeException())
         def test = new DefaultTestDescriptor("15", "Foo", "bar");
         def startEvent = new TestStartEvent(100L)
         def completeEvent = new TestCompleteEvent(200L)
@@ -157,7 +163,7 @@ class StateTrackingTestResultProcessorTest extends Specification {
         adapter.started(ok, new TestStartEvent(100L, 'suiteId'))
         adapter.started(broken, new TestStartEvent(100L, 'suiteId'))
         adapter.completed('okId', new TestCompleteEvent(200L))
-        adapter.failure('brokenId', DefaultTestFailure.fromTestFrameworkFailure(new RuntimeException()))
+        adapter.failure('brokenId', TestFailure.fromTestFrameworkFailure(new RuntimeException()))
         adapter.completed('brokenId', new TestCompleteEvent(200L))
         adapter.completed('suiteId', new TestCompleteEvent(200L))
 
@@ -209,7 +215,7 @@ class StateTrackingTestResultProcessorTest extends Specification {
         adapter.completed('ok', new TestCompleteEvent(200L))
         adapter.completed('suite1', new TestCompleteEvent(200L))
         adapter.started(broken, new TestStartEvent(100L, 'suite2'))
-        adapter.failure('broken', DefaultTestFailure.fromTestFrameworkFailure(new RuntimeException()))
+        adapter.failure('broken', TestFailure.fromTestFrameworkFailure(new RuntimeException()))
         adapter.completed('broken', new TestCompleteEvent(200L))
         adapter.completed('suite2', new TestCompleteEvent(200L))
         adapter.completed('root', new TestCompleteEvent(200L))
@@ -237,7 +243,7 @@ class StateTrackingTestResultProcessorTest extends Specification {
         given:
         def suite = new DefaultTestSuiteDescriptor("id", "FastTests");
         def test = new DefaultTestDescriptor("testid", "DogTest", "shouldBarkAtStrangers");
-        def failure = DefaultTestFailure.fromTestFrameworkFailure(new RuntimeException())
+        def failure = TestFailure.fromTestFrameworkFailure(new RuntimeException())
 
         when:
         adapter.started(suite, new TestStartEvent(100L))

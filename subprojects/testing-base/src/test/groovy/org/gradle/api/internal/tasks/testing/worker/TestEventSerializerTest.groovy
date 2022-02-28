@@ -185,7 +185,7 @@ class TestEventSerializerTest extends SerializerSpec {
     }
 
     def "serializes TestFailure"() {
-        TestFailure failure = DefaultTestFailure.fromTestAssertionFailure(new RuntimeException("cause"), 'expectedValue', 'actualValue')
+        TestFailure failure = TestFailure.fromTestAssertionFailure(new RuntimeException("cause"), 'expectedValue', 'actualValue')
 
         when:
         TestFailure result = serialize(failure, DefaultTestFailure)

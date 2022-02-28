@@ -17,6 +17,11 @@
 package org.gradle.api.tasks.testing;
 
 import org.gradle.api.Incubating;
+import org.gradle.api.internal.tasks.testing.DefaultTestFailure;
+import org.gradle.api.internal.tasks.testing.DefaultTestFailureDetails;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Describes a test failure. Contains a reference to the failure and some structural information retrieved by the test worker.
@@ -24,19 +29,62 @@ import org.gradle.api.Incubating;
  * @since 7.5
  */
 @Incubating
-public interface TestFailure {
+public abstract class TestFailure {
 
     /**
      * Returns the raw failure.
      *
      * @return the raw failure
      */
-    Throwable getRawFailure();
+    public abstract Throwable getRawFailure();
 
     /**
      * Returns structural information about the failure.
      *
      * @return the failure structure
      */
-    TestFailureDetails getDetails();
+    public abstract TestFailureDetails getDetails();
+
+    /**
+     * Creates a new TestFailure instance from an assertion failure.
+     *
+     * @param failure the assertion failure
+     * @param expected the expected value for the failure; can be {@code null}
+     * @param actual the actual value for the failure; can be {@code null}
+     * @return the new instance
+     */
+    public static TestFailure fromTestAssertionFailure(Throwable failure, String expected, String actual) {
+        DefaultTestFailureDetails details = new DefaultTestFailureDetails(failure.getMessage(), failure.getClass().getName(), stacktraceOf(failure), true, expected, actual);
+        return new DefaultTestFailure(failure, details);
+    }
+
+    /**
+     * Creates a new TestFailure instance from a test framework failure.
+     *
+     * @param failure the failure
+     * @return the new instance
+     */
+    public static TestFailure fromTestFrameworkFailure(Throwable failure) {
+        DefaultTestFailureDetails details = new DefaultTestFailureDetails(messageOf(failure), failure.getClass().getName(), stacktraceOf(failure), false, null, null);
+        return new DefaultTestFailure(failure, details);
+    }
+
+    private static String messageOf(Throwable throwable) {
+        try {
+            return throwable.getMessage();
+        } catch (Throwable t) {
+            return String.format("Could not determine failure message for exception of type %s: %s", throwable.getClass().getName(), t);
+        }
+    }
+
+    private static String stacktraceOf(Throwable throwable) {
+        try {
+            StringWriter out = new StringWriter();
+            PrintWriter wrt = new PrintWriter(out);
+            throwable.printStackTrace(wrt);
+            return out.toString();
+        } catch (Exception t) {
+            return stacktraceOf(t);
+        }
+    }
 }

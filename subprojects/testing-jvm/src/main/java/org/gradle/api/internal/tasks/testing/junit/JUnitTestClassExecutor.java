@@ -18,8 +18,8 @@ package org.gradle.api.internal.tasks.testing.junit;
 
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
-import org.gradle.api.internal.tasks.testing.DefaultTestFailure;
 import org.gradle.api.internal.tasks.testing.filter.TestSelectionMatcher;
+import org.gradle.api.tasks.testing.TestFailure;
 import org.gradle.internal.concurrent.ThreadSafe;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.Description;
@@ -57,7 +57,7 @@ public class JUnitTestClassExecutor implements Action<String> {
             runTestClass(testClassName);
             executionListener.testClassFinished(null);
         } catch (Throwable throwable) {
-            executionListener.testClassFinished(DefaultTestFailure.fromTestFrameworkFailure(throwable));
+            executionListener.testClassFinished(TestFailure.fromTestFrameworkFailure(throwable));
         }
     }
 
