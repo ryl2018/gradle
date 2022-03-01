@@ -19,6 +19,9 @@ package org.gradle.api.internal.tasks.testing;
 import org.gradle.api.tasks.testing.TestFailure;
 import org.gradle.api.tasks.testing.TestFailureDetails;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class DefaultTestFailure extends TestFailure {
 
     private final Throwable rawFailure;
@@ -62,4 +65,34 @@ public class DefaultTestFailure extends TestFailure {
         result = 31 * result + (details != null ? details.hashCode() : 0);
         return result;
     }
+
+    public static TestFailure fromTestAssertionFailure(Throwable failure, String expected, String actual) {
+        DefaultTestFailureDetails details = new DefaultTestFailureDetails(failure.getMessage(), failure.getClass().getName(), stacktraceOf(failure), true, expected, actual);
+        return new DefaultTestFailure(failure, details);
+    }
+
+    public static TestFailure fromTestFrameworkFailure(Throwable failure) {
+        DefaultTestFailureDetails details = new DefaultTestFailureDetails(messageOf(failure), failure.getClass().getName(), stacktraceOf(failure), false, null, null);
+        return new DefaultTestFailure(failure, details);
+    }
+
+    private static String messageOf(Throwable throwable) {
+        try {
+            return throwable.getMessage();
+        } catch (Throwable t) {
+            return String.format("Could not determine failure message for exception of type %s: %s", throwable.getClass().getName(), t);
+        }
+    }
+
+    private static String stacktraceOf(Throwable throwable) {
+        try {
+            StringWriter out = new StringWriter();
+            PrintWriter wrt = new PrintWriter(out);
+            throwable.printStackTrace(wrt);
+            return out.toString();
+        } catch (Exception t) {
+            return stacktraceOf(t);
+        }
+    }
+
 }
