@@ -45,17 +45,24 @@ public class GnupgSettings {
     }
 
     private String defaultExecutable() {
-        String defaultExecutable = useLegacyGpg ? "gpg" : "gpg2";
+        String defaultExecutable = "gpg";
         if (OperatingSystem.current().isWindows()) {
             defaultExecutable += ".exe";
         }
         return defaultExecutable;
     }
 
+    /**
+     * @deprecated drives no more the GPG binary selection, use {@link #setExecutable(String)} directly to define the executable
+     */
     public void setUseLegacyGpg(boolean useLegacyGpg) {
         this.useLegacyGpg = useLegacyGpg;
     }
 
+    /**
+     * @deprecated not used anymore, see {@link #setUseLegacyGpg(boolean)}
+     */
+    @Deprecated()
     public boolean getUseLegacyGpg() {
         return useLegacyGpg;
     }
