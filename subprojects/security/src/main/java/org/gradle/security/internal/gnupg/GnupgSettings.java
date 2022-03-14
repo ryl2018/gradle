@@ -45,11 +45,11 @@ public class GnupgSettings {
     }
 
     private String defaultExecutable() {
-        String defaultExecutable = "gpg";
         if (OperatingSystem.current().isWindows()) {
-            defaultExecutable += ".exe";
+            return "gpg.exe";
+        } else {
+            return "gpg";
         }
-        return defaultExecutable;
     }
 
     /**
