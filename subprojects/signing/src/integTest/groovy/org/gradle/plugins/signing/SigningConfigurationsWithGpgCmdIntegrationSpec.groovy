@@ -37,10 +37,32 @@ class SigningConfigurationsWithGpgCmdIntegrationSpec extends SigningConfiguratio
             }
         """
 
-        setupGpgCmd()
-
         when:
         run "signJar", "-i"
+
+        then:
+        executedAndNotSkipped(":signJar")
+        assertDoesNotLeakPassphrase()
+    }
+
+    @ToBeFixedForConfigurationCache
+    def "uses the default signatory"() {
+        given:
+        buildFile << """
+            signing {
+                useGpgCmd()
+                sign(jar)
+            }
+        """
+
+        // Remove the 'signing.gnupg.keyName' entry from the gradle.properties file, so the default key is picked up
+        Properties properties = new Properties()
+        properties.load(propertiesFile.newInputStream())
+        properties.remove("signing.gnupg.keyName")
+        properties.store(propertiesFile.newOutputStream(), "")
+
+        when:
+        run "sign", "-i"
 
         then:
         executedAndNotSkipped(":signJar")
