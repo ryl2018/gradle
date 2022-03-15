@@ -52,17 +52,10 @@ public class GnupgSettings {
         }
     }
 
-    /**
-     * @deprecated drives no more the GPG binary selection, use {@link #setExecutable(String)} directly to define the executable
-     */
     public void setUseLegacyGpg(boolean useLegacyGpg) {
         this.useLegacyGpg = useLegacyGpg;
     }
 
-    /**
-     * @deprecated not used anymore, see {@link #setUseLegacyGpg(boolean)}
-     */
-    @Deprecated()
     public boolean getUseLegacyGpg() {
         return useLegacyGpg;
     }
