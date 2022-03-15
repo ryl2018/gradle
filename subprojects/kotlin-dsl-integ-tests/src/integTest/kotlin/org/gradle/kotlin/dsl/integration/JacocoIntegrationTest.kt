@@ -1,9 +1,11 @@
 package org.gradle.kotlin.dsl.integration
 
+import org.gradle.api.JavaVersion
 import org.gradle.integtests.fixtures.RepoScriptBlockUtil
 import org.gradle.integtests.fixtures.ToBeFixedForConfigurationCache
 import org.gradle.test.fixtures.dsl.GradleDsl
 import org.gradle.test.fixtures.file.LeaksFileHandles
+import org.junit.Assume
 import org.junit.Test
 
 
@@ -13,6 +15,10 @@ class JacocoIntegrationTest : AbstractPluginIntegrationTest() {
     @Test
     @ToBeFixedForConfigurationCache
     fun `jacoco ignore codegen`() {
+        Assume.assumeFalse(
+            "JaCoCo must be updated to 0.8.8 when it releases for JDK 18",
+            JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_18)
+        )
         withBuildScript(
             """
             plugins {

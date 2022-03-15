@@ -32,6 +32,11 @@ class Spock2IntegrationSpec extends AbstractIntegrationSpec {
             }
             dependencies {
                 testImplementation("org.spockframework:spock-core:$SPOCK_VERSION")
+                constraints {
+                    testImplementation("org.codehaus.groovy:groovy:3.0.10") {
+                        because("It is compatible with JDK 18")
+                    }
+                }
             }
             test {
                 useJUnitPlatform()
