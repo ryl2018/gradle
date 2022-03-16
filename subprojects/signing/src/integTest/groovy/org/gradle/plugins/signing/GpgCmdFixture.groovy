@@ -34,10 +34,27 @@ class GpgCmdFixture {
         return Integer.toString(RANDOM.nextInt(MAX_RANDOM_PART_VALUE), ALL_DIGITS_AND_LETTERS_RADIX)
     }
 
+    static GpgCmdAndVersion getAvailableGpg() {
+        return tryRun("gpg")
+    }
+
+    static GpgCmdAndVersion tryRun(String cmd) {
+        try {
+            String output = "${cmd} --version".execute().text
+            return new GpgCmdAndVersion(executable: cmd, version: (output =~ GPG_VERSION_REGEX)[0][1].toInteger())
+        } catch (Exception ignored) {
+            return null
+        }
+    }
+
     static setupGpgCmd(TestFile buildDir) {
         def gpgHomeSymlink = prepareGnupgHomeSymlink(buildDir.file('gnupg-home'))
         Properties properties = new Properties()
         properties.load(buildDir.file('gradle.properties').newInputStream())
+        GpgCmdAndVersion client = getAvailableGpg()
+        assert client
+        properties.put('signing.gnupg.executable', client.executable)
+        properties.put('signing.gnupg.useLegacyGpg', (client.version == 1).toString())
         properties.put('signing.gnupg.homeDir', gpgHomeSymlink.toAbsolutePath().toString())
         properties.remove('signing.gnupg.optionsFile')
         properties.store(buildDir.file('gradle.properties').newOutputStream(), '')
@@ -55,4 +72,11 @@ class GpgCmdFixture {
         Path tmpLink = Paths.get(SystemProperties.getInstance().getJavaIoTmpDir()).resolve(createRandomPrefix())
         return Files.createSymbolicLink(tmpLink, gpgHomeInTest.toPath())
     }
+}
+
+class GpgCmdAndVersion {
+    // gpg or gpg2
+    String executable
+    // 1 or 2
+    int version
 }

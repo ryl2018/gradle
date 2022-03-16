@@ -20,6 +20,10 @@ import org.gradle.integtests.fixtures.ToBeFixedForConfigurationCache
 
 class SigningWithGpgCmdIntegrationSpec extends SigningIntegrationSpec {
 
+    SignMethod getSignMethod() {
+        return SignMethod.GPG_CMD
+    }
+
     @ToBeFixedForConfigurationCache
     def "uses the default signatory"() {
         given:
@@ -37,17 +41,10 @@ class SigningWithGpgCmdIntegrationSpec extends SigningIntegrationSpec {
         properties.store(propertiesFile.newOutputStream(), "")
 
         when:
-        run "sign", "-i"
-
+        run "signJar", "-i"
 
         then:
         executedAndNotSkipped(":signJar")
-        assertDoesNotLeakPassphrase()
-    }
-
-    private void assertDoesNotLeakPassphrase() {
-        outputContains("--passphrase-fd 0")
-        result.assertNotOutput("--passphrase ")
     }
 
 }
