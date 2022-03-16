@@ -87,7 +87,7 @@ public abstract class Node implements Comparable<Node> {
     }
 
     public boolean isIncludeInGraph() {
-        return !filtered && state != ExecutionState.NOT_SCHEDULED && state != ExecutionState.EXECUTED && state != ExecutionState.FAILED_DEPENDENCY;
+        return !filtered && state != ExecutionState.NOT_SCHEDULED && !isAlreadyExecuted();
     }
 
     public boolean isAlreadyExecuted() {
@@ -115,6 +115,13 @@ public abstract class Node implements Comparable<Node> {
      * <p>A node may be complete for several reasons, for example when its actions have been executed, or when its outputs have been considered up-to-date or loaded from the build cache,
      * or when it cannot run due to a failure in a dependency.</p>
      */
+    public boolean isWillNotRun() {
+        return state == ExecutionState.EXECUTED
+            || state == ExecutionState.FAILED_DEPENDENCY
+            || state == ExecutionState.NOT_SCHEDULED
+            || filtered;
+    }
+
     public boolean isComplete() {
         return state == ExecutionState.EXECUTED
             || state == ExecutionState.FAILED_DEPENDENCY
@@ -154,8 +161,6 @@ public abstract class Node implements Comparable<Node> {
     @Nullable
     public abstract Throwable getNodeFailure();
 
-    public abstract void rethrowNodeFailure();
-
     public void startExecution(Consumer<Node> nodeStartAction) {
         assert isReady();
         state = ExecutionState.EXECUTING;
@@ -175,13 +180,13 @@ public abstract class Node implements Comparable<Node> {
     }
 
     public void abortExecution(Consumer<Node> completionAction) {
-        assert isReady();
+        assert !isAlreadyExecuted();
         state = ExecutionState.NOT_SCHEDULED;
         completionAction.accept(this);
     }
 
     public void require() {
-        if (state == ExecutionState.EXECUTED) {
+        if (isAlreadyExecuted()) {
             return;
         }
         if (state != ExecutionState.SHOULD_RUN) {
@@ -195,7 +200,7 @@ public abstract class Node implements Comparable<Node> {
      * Mark this node as filtered from the current plan. The node will be considered complete and successful.
      */
     public void filtered() {
-        if (state == ExecutionState.EXECUTED) {
+        if (isAlreadyExecuted()) {
             return;
         }
         filtered = true;
