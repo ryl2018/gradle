@@ -1014,7 +1014,7 @@ class DefaultExecutionPlanTest extends AbstractExecutionPlanSpec {
                     break
                 }
                 assert selection != ExecutionPlan.NO_NODES_READY_TO_START // There should always be a node ready to start when executing sequentially
-                def nextNode = selection.node
+                def nextNode = selection.item
                 assert !nextNode.isComplete()
                 nodes << nextNode
                 executionPlan.finishedExecuting(nextNode)
