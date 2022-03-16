@@ -42,6 +42,20 @@ public interface WorkSource<T> {
     }
 
     abstract class Selection<T> {
+        private static final Selection<Object> NO_WORK_READY_TO_START = new Selection<Object>() {
+            @Override
+            public boolean isNoWorkReadyToStart() {
+                return true;
+            }
+        };
+        private static final Selection<Object> NO_MORE_WORK_TO_START = new Selection<Object>() {
+            @Override
+            public boolean isNoMoreWorkToStart() {
+                return true;
+            }
+        };
+
+
         public static <S> Selection<S> of(S item) {
             return new Selection<S>() {
                 @Override
@@ -59,18 +73,21 @@ public interface WorkSource<T> {
             return Cast.uncheckedCast(NO_MORE_WORK_TO_START);
         }
 
+        public boolean isNoWorkReadyToStart() {
+            return false;
+        }
+
+        public boolean isNoMoreWorkToStart() {
+            return false;
+        }
+
         public T getItem() {
             throw new IllegalStateException();
         }
     }
 
-    Selection NO_WORK_READY_TO_START = new Selection() {
-    };
-    Selection NO_MORE_WORK_TO_START = new Selection() {
-    };
-
     /**
-     * Some basic diagnostic information about the state of the plan.
+     * Some basic diagnostic information about the state of the work.
      */
     class Diagnostics {
         private final boolean canMakeProgress;
@@ -82,10 +99,8 @@ public interface WorkSource<T> {
         }
 
         /**
-         * Returns true when this plan is either finished or is still able to select further items.
+         * Returns true when either all work is finished or there are further items that can be selected.
          * Returns false when there are items queued but none of them will be able to be selected, without some external change (eg completion of a task in an included build).
-         *
-         * this method should never return false.
          */
         public boolean canMakeProgress() {
             return canMakeProgress;
@@ -104,14 +119,14 @@ public interface WorkSource<T> {
      *
      * <p>Note: the caller does not need to hold a worker lease to call this method.</p>
      *
-     * <p>The implementation of this method may prefer to return {@link #NO_WORK_READY_TO_START} in certain cases, to limit
+     * <p>The implementation of this method may prefer to return {@link State#MaybeWorkReadyToStart} in certain cases, to limit
      * the amount of work that happens in this method, which is called many, many times and should be fast.</p>
      */
     State executionState();
 
     /**
-     * Selects a work item to start, returns {@link #NO_WORK_READY_TO_START} when there are no items that are ready to start (but some are queued for execution)
-     * and {@link #NO_MORE_WORK_TO_START} when there are no items remaining to start.
+     * Selects a work item to start, returns {@link Selection#noWorkReadyToStart()} when there are no items that are ready to start (but some are queued for execution)
+     * and {@link Selection#noMoreWorkToStart()} when there are no items remaining to start.
      *
      * <p>Note: the caller must hold a worker lease.</p>
      *

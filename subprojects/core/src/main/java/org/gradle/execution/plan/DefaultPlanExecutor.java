@@ -195,9 +195,9 @@ public class DefaultPlanExecutor implements PlanExecutor, Stoppable {
             while (iterator.hasNext()) {
                 PlanDetails details = iterator.next();
                 WorkSource.Selection<Object> selection = details.source.selectNext();
-                if (selection == WorkSource.NO_MORE_WORK_TO_START) {
+                if (selection.isNoMoreWorkToStart()) {
                     iterator.remove();
-                } else if (selection != WorkSource.NO_WORK_READY_TO_START) {
+                } else if (!selection.isNoWorkReadyToStart()) {
                     return WorkSource.Selection.of(new WorkItem(selection, details.source, details.worker));
                 }
             }
@@ -392,9 +392,9 @@ public class DefaultPlanExecutor implements PlanExecutor, Stoppable {
                     queue.abortAllAndFail(t);
                     return FINISHED;
                 }
-                if (workItem == WorkSource.NO_MORE_WORK_TO_START) {
+                if (workItem.isNoMoreWorkToStart()) {
                     return FINISHED;
-                } else if (workItem == WorkSource.NO_WORK_READY_TO_START) {
+                } else if (workItem.isNoWorkReadyToStart()) {
                     // Release worker lease while waiting
                     workerLease.unlock();
                     return RETRY;
