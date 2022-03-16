@@ -21,7 +21,6 @@ import org.gradle.execution.plan.ExecutionPlan;
 import org.gradle.execution.plan.Node;
 import org.gradle.internal.build.ExecutionResult;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 

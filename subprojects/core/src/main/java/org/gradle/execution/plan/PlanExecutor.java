@@ -22,7 +22,6 @@ import org.gradle.internal.service.scopes.Scopes;
 import org.gradle.internal.service.scopes.ServiceScope;
 
 import javax.annotation.concurrent.ThreadSafe;
-import java.util.Collection;
 
 /**
  * Responsible for running the work of a build tree, packaged as zero or more {@link ExecutionPlan} instances.
