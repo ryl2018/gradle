@@ -1008,18 +1008,18 @@ class DefaultExecutionPlanTest extends AbstractExecutionPlanSpec {
     List<Node> getExecutedNodes() {
         def nodes = []
         coordinator.withStateLock {
-            while (executionPlan.executionState() != ExecutionPlan.State.NoMoreNodesToStart) {
+            while (executionPlan.executionState() != WorkSource.State.NoMoreWorkToStart) {
                 def selection = executionPlan.selectNext()
-                if (selection == ExecutionPlan.NO_MORE_NODES_TO_START) {
+                if (selection == WorkSource.NO_MORE_WORK_TO_START) {
                     break
                 }
-                assert selection != ExecutionPlan.NO_NODES_READY_TO_START // There should always be a node ready to start when executing sequentially
+                assert selection != WorkSource.NO_WORK_READY_TO_START // There should always be a node ready to start when executing sequentially
                 def nextNode = selection.item
                 assert !nextNode.isComplete()
                 nodes << nextNode
-                executionPlan.finishedExecuting(nextNode)
+                executionPlan.finishedExecuting(nextNode, null)
             }
-            assert executionPlan.executionState() == ExecutionPlan.State.NoMoreNodesToStart
+            assert executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
             assert executionPlan.allExecutionComplete()
         }
         return nodes

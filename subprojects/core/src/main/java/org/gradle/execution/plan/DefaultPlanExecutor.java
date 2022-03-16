@@ -118,6 +118,7 @@ public class DefaultPlanExecutor implements PlanExecutor, Stoppable {
                     }
                 }
                 workSource.collectFailures(failures);
+                queue.remove(workSource);
                 return FINISHED;
             } else {
                 // Release worker lease (if held) while waiting for work to complete
@@ -223,16 +224,27 @@ public class DefaultPlanExecutor implements PlanExecutor, Stoppable {
             });
         }
 
+        public void remove(WorkSource<?> workSource) {
+            coordinationService.assertHasStateLock();
+            if (workSource.executionState() != WorkSource.State.NoMoreWorkToStart) {
+                throw new IllegalStateException("Not all work has completed.");
+            }
+            Iterator<PlanDetails> iterator = queues.iterator();
+            while (iterator.hasNext()) {
+                PlanDetails details = iterator.next();
+                if (details.source == workSource) {
+                    iterator.remove();
+                    return;
+                }
+            }
+        }
+
         @Override
         public void close() throws IOException {
             coordinationService.withStateLock(() -> {
                 finished = true;
                 if (!queues.isEmpty()) {
-                    for (PlanDetails queue : queues) {
-                        if (queue.source.executionState() != WorkSource.State.NoMoreWorkToStart) {
-                            throw new IllegalStateException("Not all work has completed.");
-                        }
-                    }
+                    throw new IllegalStateException("Not all work has completed.");
                 }
                 // Signal to the worker threads that no more work is available
                 coordinationService.notifyStateChange();
