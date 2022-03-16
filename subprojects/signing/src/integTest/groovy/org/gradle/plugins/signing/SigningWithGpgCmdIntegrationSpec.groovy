@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,34 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.gradle.plugins.signing
 
 import org.gradle.integtests.fixtures.ToBeFixedForConfigurationCache
-import org.gradle.plugins.signing.signatory.internal.gnupg.GnupgSignatoryProvider
-import org.gradle.util.Requires
 
-@Requires(adhoc = { GpgCmdFixture.getAvailableGpg() != null })
-class SigningConfigurationsWithGpgCmdIntegrationSpec extends SigningConfigurationsIntegrationSpec {
-    SignMethod getSignMethod() {
-        return SignMethod.GPG_CMD
-    }
+class SigningWithGpgCmdIntegrationSpec extends SigningIntegrationSpec {
 
     @ToBeFixedForConfigurationCache
-    def "does not leak passphrase at info logging"() {
+    def "uses the default signatory"() {
         given:
         buildFile << """
-            ${keyInfo.addAsPropertiesScript()}
             signing {
                 useGpgCmd()
                 sign(jar)
-                signatories = new ${GnupgSignatoryProvider.name}()
             }
         """
 
-        setupGpgCmd()
+        // Remove the 'signing.gnupg.keyName' entry from the gradle.properties file, so the default key is picked up
+        Properties properties = new Properties()
+        properties.load(propertiesFile.newInputStream())
+        properties.remove("signing.gnupg.keyName")
+        properties.store(propertiesFile.newOutputStream(), "")
 
         when:
-        run "signJar", "-i"
+        run "sign", "-i"
+
 
         then:
         executedAndNotSkipped(":signJar")
@@ -51,4 +49,5 @@ class SigningConfigurationsWithGpgCmdIntegrationSpec extends SigningConfiguratio
         outputContains("--passphrase-fd 0")
         result.assertNotOutput("--passphrase ")
     }
+
 }
