@@ -85,7 +85,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
         firstTaskNode.task == a
         coordinator.withStateLock {
             executionPlan.executionState() == WorkSource.State.MaybeWorkReadyToStart
-            executionPlan.selectNext() == WorkSource.NO_WORK_READY_TO_START
+            executionPlan.selectNext().noWorkReadyToStart
             executionPlan.executionState() == WorkSource.State.NoWorkReadyToStart
         }
 
@@ -95,7 +95,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
         then:
         coordinator.withStateLock {
             executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
-            executionPlan.selectNext() == WorkSource.NO_MORE_WORK_TO_START
+            executionPlan.selectNext().noWorkReadyToStart
             executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
             executionPlan.allExecutionComplete()
         }
@@ -115,7 +115,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
         firstTaskNode.task == b
         coordinator.withStateLock {
             executionPlan.executionState() == WorkSource.State.MaybeWorkReadyToStart
-            executionPlan.selectNext() == WorkSource.NO_WORK_READY_TO_START
+            executionPlan.selectNext().noWorkReadyToStart
             executionPlan.executionState() == WorkSource.State.NoWorkReadyToStart
         }
 
@@ -134,7 +134,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
         secondTaskNode.task == a
         coordinator.withStateLock {
             executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
-            executionPlan.selectNext() == WorkSource.NO_MORE_WORK_TO_START
+            executionPlan.selectNext().noWorkReadyToStart
             executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
         }
 
@@ -144,7 +144,7 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
         then:
         coordinator.withStateLock {
             executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
-            executionPlan.selectNext() == WorkSource.NO_MORE_WORK_TO_START
+            executionPlan.selectNext().noWorkReadyToStart
             executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
         }
     }
@@ -1060,16 +1060,16 @@ class DefaultExecutionPlanParallelTest extends AbstractExecutionPlanSpec {
     private LocalTaskNode selectNextTaskNode() {
         def result = null
         coordinator.withStateLock {
-            def selection
+            WorkSource.Selection selection
             recordLocks {
                 selection = executionPlan.selectNext()
             }
-            if (selection == WorkSource.NO_WORK_READY_TO_START) {
+            if (selection.noWorkReadyToStart) {
                 assert executionPlan.executionState() == WorkSource.State.NoWorkReadyToStart
                 assert !executionPlan.allExecutionComplete()
                 return
             }
-            if (selection == WorkSource.NO_MORE_WORK_TO_START) {
+            if (selection.noMoreWorkToStart) {
                 assert executionPlan.executionState() == WorkSource.State.NoMoreWorkToStart
                 return
             }

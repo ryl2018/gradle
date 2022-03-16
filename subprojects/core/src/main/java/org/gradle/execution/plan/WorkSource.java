@@ -143,9 +143,9 @@ public interface WorkSource<T> {
     /**
      * Has all execution completed?
      *
-     * <p>When this method returns {@code true}, there is definitely no further work to start and no work in progress.</p>
+     * <p>When this method returns {@code true}, there is no further work to start and no work in progress.</p>
      *
-     * <p>When this method returns {@code false}, there may be further work yet to complete.</p>
+     * <p>When this method returns {@code false}, there is further work yet to complete.</p>
      */
     boolean allExecutionComplete();
 
