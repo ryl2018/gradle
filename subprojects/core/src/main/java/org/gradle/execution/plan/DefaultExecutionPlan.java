@@ -205,7 +205,7 @@ public class DefaultExecutionPlan implements ExecutionPlan {
                     }
                     if (node instanceof TaskNode && targetNode instanceof TaskNode) {
                         // if the dependency doesn't already have an ordinal assigned, then inherit the ordinal from this node
-                        ((TaskNode) targetNode).maybeSetOrdinal(((TaskNode) node).getOrdinal());
+                        ((TaskNode) targetNode).maybeInheritOrdinal((TaskNode) node);
                     }
                 });
                 if (node.isRequired()) {
@@ -367,6 +367,7 @@ public class DefaultExecutionPlan implements ExecutionPlan {
                         int position = finalizerTaskPosition(finalizer, nodeQueue);
                         nodeQueue.add(position, new NodeInVisitingSegment(finalizer, visitingSegmentCounter++));
                     }
+
                 }
 
                 // Add any ordinal relationships for this node

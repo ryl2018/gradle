@@ -185,9 +185,31 @@ public abstract class TaskNode extends Node {
         return ordinal;
     }
 
-    public void maybeSetOrdinal(int ordinal) {
-        if (this.ordinal == UNKNOWN_ORDINAL || this.ordinal > ordinal) {
-            this.ordinal = ordinal;
+    /**
+     * Set the ordinal to the ordinal of the given node if:
+     *     - this node does not have an ordinal set
+     * OR  - the given node depends on this node (i.e. we have to move this node to an earlier ordinal group)
+     * OR  - this node is a finalizer of the given node (i.e. we have to move this node to a later ordinal group)
+     */
+    public void maybeInheritOrdinal(TaskNode node) {
+        if (this.ordinal == UNKNOWN_ORDINAL
+            || (dependencyOf(node) && this.ordinal > node.ordinal)
+            || (finalizerOf(node) && this.ordinal < node.ordinal)) {
+            this.ordinal = node.ordinal;
         }
+    }
+
+    /**
+     * Returns true if this node is a dependency of the given node
+     */
+    private boolean dependencyOf(TaskNode node) {
+        return node.mustSuccessors.contains(this) || Iterables.contains(node.getHardSuccessors(), this);
+    }
+
+    /**
+     * Returns true if this node is a finalizer of the given node
+     */
+    private boolean finalizerOf(TaskNode node) {
+        return node.getFinalizers().contains(this);
     }
 }
