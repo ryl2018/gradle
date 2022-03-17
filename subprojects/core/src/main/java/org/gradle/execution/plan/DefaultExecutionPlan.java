@@ -379,10 +379,12 @@ public class DefaultExecutionPlan implements ExecutionPlan, WorkSource<Node> {
         executionQueue.addAll(nodeMapping);
 
         for (Node node : executionQueue) {
-            maybeNodesReady(node.updateAllDependenciesComplete() && node.isReady());
+            node.updateAllDependenciesComplete();
         }
 
         maybeNodesSelectable = true;
+        maybeNodesReady = true;
+
         lockCoordinator.addLockReleaseListener(resourceUnlockListener);
     }
 
@@ -1038,8 +1040,8 @@ public class DefaultExecutionPlan implements ExecutionPlan, WorkSource<Node> {
         Throwable executionFailure = node.getExecutionFailure();
         if (executionFailure != null) {
             // Always abort execution for an execution failure (as opposed to a node failure)
-            abortExecution();
             failures.add(executionFailure);
+            abortExecution();
             return;
         }
 
